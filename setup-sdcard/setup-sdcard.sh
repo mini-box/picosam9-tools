@@ -1,15 +1,16 @@
 #!/bin/bash
 
 echo "" > log.txt
-DEVICE=$1
+FULLPATH_DEVICE=$1
 
-if [ -z $DEVICE ]
+if [ -z $FULLPATH_DEVICE ]
 then
-    echo "No disk specified. Please specify only the disk name without /dev/ (ie: sdf)"
+    echo "No disk specified. Aborting."
     exit 1
 fi
 
-FULLPATH_DEVICE="/dev/$DEVICE"
+DEVICE=${FULLPATH_DEVICE:5}
+echo $DEVICE
 IS_REMOVABLE=`cat /sys/block/$DEVICE/removable`
 
 if [ -z "$IS_REMOVABLE" ]
