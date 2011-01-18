@@ -19,8 +19,8 @@ BS=512 # block size used
 COUNT=524288 # BS * COUNT = image size change this to change image size
 CYL=$(($COUNT/63/255)) # 255 heads, 63 sectors
 BOOT_SIZE=24 # boot partition size in MB
-BOOT_PERC=$((($BOOT_SIZE*1024 *1024*100)/($BS*$COUNT)+1)) #partition size percentage
-BOOT_CYL=$(($CYL*BOOT_PERC/100+1))
+BOOT_PERC=$((($BOOT_SIZE*1024 *1024*100)/($BS*$COUNT))) #partition size percentage
+BOOT_CYL=$(($CYL*BOOT_PERC/100))
 
 
 date > log.txt 2>&1
@@ -41,11 +41,11 @@ rm -f $IMAGE
 
 echo -n "*   Creating empty disk image..."
 dd if=/dev/zero of=$IMAGE bs=$BS count=$COUNT >> log.txt 2>&1
-losetup $L1 image.img >> log.txt 2>&1
+losetup $L1 $IMAGE >> log.txt 2>&1
 echo "done"
 
 echo -n "*   Creating partitions on $L1 ..."
-sfdisk -H 255 -S 63 -C $CYL >> log.txt 2>&1 $L1 << EOF
+sfdisk -D -H 255 -S 63 -C $CYL >> log.txt 2>&1 $L1 << EOF
 ,$BOOT_CYL,4
 ,,83
 EOF
@@ -56,6 +56,7 @@ BOOT_P_OFFSET=$(($(fdisk -ul $L1 | grep ${L1}p1 | awk '{print $2}')*512))
 BOOT_P_SIZE=$(($(fdisk -ul $L1 | grep ${L1}p1 | awk '{print $3}')*1024))
 ROOT_P_OFFSET=$(($(fdisk -ul $L1 | grep ${L1}p2 | awk '{print $2}')*512))
 ROOT_P_SIZE=$(($(fdisk -ul $L1 | grep ${L1}p2 | awk '{print $3}')*1024))
+ROOT_P_BLOCKS=$(($(fdisk -ul $L1 | grep ${L1}p2 | awk '{print $4}')))
 
 echo "BOOT: $BOOT_P_OFFSET, $BOOT_P_SIZE ROOTFS: $ROOT_P_OFFSET, $ROOT_P_SIZE" >> log.txt 2>&1
 
@@ -67,8 +68,11 @@ echo -n "*   Creating MSDOS filesystem for BOOT partition ..."
 mkfs.msdos -n "BOOT" -F 16 $L2 >>log.txt 2>&1
 echo "done"
 echo -n "*   Creating EXT3 filesystem for ROOTFS partition ..."
-mkfs.ext3 -m 0 -L "ROOTFS" $L3 >>log.txt 2>&1
+mkfs.ext3 -m 0 -L "ROOTFS" $L3 $ROOT_P_BLOCKS >>log.txt 2>&1
 echo "done"
+
+sleep 1
+sync
 
 echo -n "*   Mounting paritions ..."
 mount $L2 $MOUNT_BOOT_D
