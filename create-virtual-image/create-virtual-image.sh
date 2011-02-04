@@ -69,6 +69,8 @@ mkfs.msdos -n "BOOT" -F 16 $L2 >>log.txt 2>&1
 echo "done"
 echo -n "*   Creating EXT3 filesystem for ROOTFS partition ..."
 mkfs.ext3 -m 0 -L "ROOTFS" $L3 $ROOT_P_BLOCKS >>log.txt 2>&1
+tune2fs -c 0 $L3 >>log.txt 2>&1
+ 
 echo "done"
 
 sleep 1
