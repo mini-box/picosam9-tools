@@ -2,7 +2,7 @@
 # Used to generate both an unpacked rootfs and a jffs2 image
 
 # ANDROID_PRODUCT=generic # Use this if you haven't defined a new product in android
-TOOLS_ROOT="/indevel/minibox-android/picopc-tools/android-tools/"
+TOOLS_ROOT="../.."
 ANDROID_PRODUCT=picopc
 
 #For a release build of android
