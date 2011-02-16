@@ -1,13 +1,15 @@
 function unpack_android()
 {
-    echo "Working in $CURRENT_PATH/$UNPACK_PATH"
+    #echo "Working in $CURRENT_PATH/$UNPACK_PATH"
     mkdir -p "$UNPACK_PATH"
 
     cd $UNPACK_PATH
     #unpack ramdisk (normal ramdisk img)
+    echo -n "Unpacking android / ..."
     cat "$ANDROID_SDK_IMAGES_PATH/ramdisk.img" | gunzip | cpio -i
     cd "$CURRENT_PATH"
 
+    echo -n "Unpacking android /system ..."
     #unpack system (yaffs2 img) that is mounted by android in /system
     mkdir -p "$UNPACK_PATH/system"
     cd "$UNPACK_PATH/system"
@@ -28,13 +30,15 @@ function apply_changes()
 
 
     # Add custom mini-box changes for picopc boards
-    cp -av "$ANDROID_CUSTOM_CHANGES_PATH/"*  "$UNPACK_PATH/"
+    echo -n Performing custom changes...
+    cp -a "$ANDROID_CUSTOM_CHANGES_PATH/"*  "$UNPACK_PATH/"
     # We don't need the emulator init
-    rm -vf "$UNPACK_PATH/init.goldfish.rc"
+    rm -f "$UNPACK_PATH/init.goldfish.rc"
     # Silence dbus.conf permision denied
     chmod 444 "$CURRENT_PATH/$UNPACK_PATH/system/etc/dbus.conf"
+    echo "done"
     # Create the latest link
-    rm latest
+    rm -f latest
     cd "$CURRENT_PATH"
     ln -sf "$UNPACK_PATH" latest
 }
