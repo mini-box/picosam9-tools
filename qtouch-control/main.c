@@ -3,13 +3,31 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 
 #define ATMEL_QTOUCH_ADDR 0x12
 #define I2C_NR 0
 
+static char * dec8bit(int dec)
+{
 
+    char *bin = (char *) malloc(9);
+    int pos = 7;
+
+    while(dec >= 0 && pos >= 0)
+    {
+	if(dec % 2 == 0)
+	    bin[pos] = '0';
+	else
+	    bin[pos] = '1';
+	dec = dec/2;
+	pos--;
+    }
+    bin[8] = '\0';
+    return bin;
+}
 
 static int i2c_read(int fd, unsigned char *buf, int len)
 {
@@ -22,7 +40,7 @@ static int i2c_read(int fd, unsigned char *buf, int len)
 	return 0;
     }
     
-    fprintf(stdout, "Read from address %d: %d\n", addr, buf[0]);
+    fprintf(stdout, "Read from address %d: %s(%d)\n", addr, dec8bit(buf[0]), buf[0]);
     
     return 1;
 }
