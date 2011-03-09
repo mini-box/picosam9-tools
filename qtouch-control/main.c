@@ -1,3 +1,7 @@
+/*  Small test for Atmel QTouch board based on AT42QT1060
+*   (c) 2011 Nicu Pavel <npavel@ituner.com>
+*/
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -106,5 +110,11 @@ int main(int argc, char *argv[])
     device_read(file, 0x02);
     device_read(file, 0x04);
     device_read(file, 0x05);
+    
+    fflush(stdout);
+    fflush(stderr);
+    /* add a small delay before exiting usefull in burn in tests */
+    usleep(100000);
+    
     return 0;
 }
