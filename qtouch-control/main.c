@@ -4,6 +4,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 
@@ -68,12 +70,25 @@ int device_read(int fd, unsigned char reg)
 }
 
 
-int main(void)
+int main(int argc, char *argv[])
 {
     int file;
+    int i2c_bus = I2C_NR;
     char filename[20];
     
-    snprintf(filename, 19, "/dev/i2c-%d", I2C_NR);
+    if (argc < 2) 
+	fprintf(stderr, "No i2c bus specified, using bus: %d\n", i2c_bus);
+    else
+	i2c_bus = strtol(argv[1], (char **)NULL, 10);
+
+    if ((errno == ERANGE && (i2c_bus == LONG_MAX || i2c_bus == LONG_MIN))
+           || (errno != 0 && i2c_bus == 0)) 
+    {
+	perror("strtol");
+        exit(EXIT_FAILURE);
+    }
+
+    snprintf(filename, 19, "/dev/i2c-%d", i2c_bus);
     file = open(filename, O_RDWR);
     if (file < 0)
     {
