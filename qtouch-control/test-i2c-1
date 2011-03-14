@@ -1,0 +1,1 @@
+while [ 1 ]; do /qtouch-control 1; clear ; done
