@@ -65,7 +65,7 @@ losetup -o $BOOT_P_OFFSET --sizelimit $BOOT_P_SIZE $L2 $L1
 losetup -o $ROOT_P_OFFSET --sizelimit $ROOT_P_SIZE $L3 $L1
 echo "done"
 echo -n "*   Creating MSDOS filesystem for BOOT partition ..."
-mkfs.msdos -n "BOOT" -F 16 $L2 >>log.txt 2>&1
+tools/mkdosfs -n "BOOT" -F 16 $L2 >>log.txt 2>&1
 echo "done"
 echo -n "*   Creating EXT3 filesystem for ROOTFS partition ..."
 mkfs.ext3 -m 0 -L "ROOTFS" $L3 $ROOT_P_BLOCKS >>log.txt 2>&1

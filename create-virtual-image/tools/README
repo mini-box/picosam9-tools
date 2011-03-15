@@ -1,0 +1,2 @@
+This is mkdosfs 3.0.7. Newer versions create a FAT 16 size of 126 sectors instead of 125 sectors
+which won't boot in atmel bootstrap code.
