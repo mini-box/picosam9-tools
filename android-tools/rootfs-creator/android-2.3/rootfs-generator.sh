@@ -16,6 +16,11 @@ UNYAFFS_PATH="${ROOT}/tools/unyaffs"
 DATE=$(date +%F-%H-%M-%S)
 UNPACK_PATH="release-"$DATE
 
+# For Google official apps
+WITH_GAPPS=0
+GAPPSZIP=gapps-gb-20110307-signed.zip
+GAPPSMIRROR="http://goo-inside.me/gapps/"
+
 . ./functions.sh
 
 unpack_android

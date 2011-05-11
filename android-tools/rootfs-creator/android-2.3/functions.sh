@@ -22,18 +22,26 @@ function apply_changes()
     #userdata.img is an empty file just create it's mount point on live fs
     mkdir -p "$UNPACK_PATH/data"
 
-    #create other needed dirs
-    mkdir -p "$UNPACK_PATH/bluetooth"
-    mkdir -p "$UNPACK_PATH/cache"
-    mkdir -p "$UNPACK_PATH/root"
-    mkdir -p "$UNPACK_PATH/misc"
-
-
     # Add custom mini-box changes for picopc boards
+    if [ $WITH_GAPPS -eq 1 ]
+    then
+    echo -n Downloading Google Official Apps
+    wget --tries=5 -O "${CURRENT_PATH}"/$GAPPSZIP $GAPPSMIRROR/$GAPPSZIP
+
+    if [ $? != 0 ]
+    then
+	echo " error downloading Google apps package $GAPPSMIRROR/$GAPPSZIP"
+    else
+	[ -f "${CURRENT_PATH}"/$GAPPSZIP ] && unzip -o "${CURRENT_PATH}"/$GAPPSZIP -d "${UNPACK_PATH}"
+	rm "${CURRENT_PATH}"/$GAPPSZIP
+    fi 
+    echo "done"
+    fi
+    
     echo -n Performing custom changes...
     cp -a "$ANDROID_CUSTOM_CHANGES_PATH/"*  "$UNPACK_PATH/"
-    # We don't need the emulator init
-    rm -f "$UNPACK_PATH/init.goldfish.rc"
+    # We don't need the emulator stuff
+    rm -f "$UNPACK_PATH/*.goldfish.rc"
     # Silence dbus.conf permision denied
     chmod 444 "$CURRENT_PATH/$UNPACK_PATH/system/etc/dbus.conf"
     echo "done"
