@@ -7,7 +7,7 @@
 
 export LC_ALL=C # force locale to prevent parsing problems
 
-IMAGE=image.img #image name don't change this without changing sync-virtual-image.sh
+IMAGE="tmp/image.img" #image name don't change this without changing sync-virtual-image.sh
 L1=/dev/loop0   #entire disk loop device
 L2=/dev/loop1   #boot partition loop device
 L3=/dev/loop2   #rootfs partition loop device

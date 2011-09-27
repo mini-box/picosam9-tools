@@ -4,9 +4,9 @@
 export LC_ALL=C # force locale to prevent parsing problems
 
 DATE=$(date +%F)
-
-OUTPUT_ZIP="android-2.1-eclair-${DATE}.zip"
-IMAGE=image.img
+OUTPUT_DIR="./generated-images/"
+OUTPUT_ZIP="image-${DATE}.zip"
+IMAGE="tmp/image.img"
 L1=/dev/loop0   #entire disk loop device
 L2=/dev/loop1   #boot partition loop device
 L3=/dev/loop2   #rootfs partition loop device
@@ -28,10 +28,10 @@ read prefix
 
 if [ -z $prefix ] 
 then
-    name=$OUTPUT_ZIP
+    name=${OUTPUT_DIR}${OUTPUT_ZIP}
 else
-    name="$prefix-$DATE.zip"
+    name="${OUTPUT_DIR}$prefix-$DATE.zip"
 fi
 
 
-zip -9 $name $IMAGE
+zip -9 -j $name $IMAGE #-j do not store path
