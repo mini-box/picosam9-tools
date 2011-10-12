@@ -8,6 +8,7 @@
 export LC_ALL=C # force locale to prevent parsing problems
 
 IMAGE="tmp/image.img" #image name don't change this without changing sync-virtual-image.sh
+LOG="tmp/log.txt" # $LOG name
 L1=/dev/loop0   #entire disk loop device
 L2=/dev/loop1   #boot partition loop device
 L3=/dev/loop2   #rootfs partition loop device
@@ -23,29 +24,29 @@ BOOT_PERC=$((($BOOT_SIZE*1024 *1024*100)/($BS*$COUNT))) #partition size percenta
 BOOT_CYL=$(($CYL*BOOT_PERC/100))
 
 
-date > log.txt 2>&1
+date > $LOG 2>&1
 echo "Creating a $((($BS*$COUNT)/1024/1024)) MB image with $BOOT_PERC% boot partition"
-echo "Creating a image with $CYL cylinders, $BOOT_PERC % boot with $BOOT_CYL cylinders" >> log.txt 2>&1
+echo "Creating a image with $CYL cylinders, $BOOT_PERC % boot with $BOOT_CYL cylinders" >> $LOG 2>&1
 
-mkdir -p $MOUNT_BOOT_D >> log.txt 2>&1
-mkdir -p $MOUNT_ROOTFS_D >> log.txt 2>&1
+mkdir -p $MOUNT_BOOT_D >> $LOG 2>&1
+mkdir -p $MOUNT_ROOTFS_D >> $LOG 2>&1
 
-umount $L3 >> log.txt 2>&1
-umount $L2 >> log.txt 2>&1
+umount $L3 >> $LOG 2>&1
+umount $L2 >> $LOG 2>&1
 
-losetup -d $L3 >> log.txt 2>&1
-losetup -d $L2 >> log.txt 2>&1
-losetup -d $L1 >> log.txt 2>&1
+losetup -d $L3 >> $LOG 2>&1
+losetup -d $L2 >> $LOG 2>&1
+losetup -d $L1 >> $LOG 2>&1
 
 rm -f $IMAGE
 
 echo -n "*   Creating empty disk image..."
-dd if=/dev/zero of=$IMAGE bs=$BS count=$COUNT >> log.txt 2>&1
-losetup $L1 $IMAGE >> log.txt 2>&1
+dd if=/dev/zero of=$IMAGE bs=$BS count=$COUNT >> $LOG 2>&1
+losetup $L1 $IMAGE >> $LOG 2>&1
 echo "done"
 
 echo -n "*   Creating partitions on $L1 ..."
-sfdisk -D -H 255 -S 63 -C $CYL >> log.txt 2>&1 $L1 << EOF
+sfdisk -D -H 255 -S 63 -C $CYL >> $LOG 2>&1 $L1 << EOF
 ,$BOOT_CYL,4
 ,,83
 EOF
@@ -58,18 +59,18 @@ ROOT_P_OFFSET=$(($(fdisk -ul $L1 | grep ${L1}p2 | awk '{print $2}')*512))
 ROOT_P_SIZE=$(($(fdisk -ul $L1 | grep ${L1}p2 | awk '{print $3}')*1024))
 ROOT_P_BLOCKS=$(($(fdisk -ul $L1 | grep ${L1}p2 | awk '{print $4}')))
 
-echo "BOOT: $BOOT_P_OFFSET, $BOOT_P_SIZE ROOTFS: $ROOT_P_OFFSET, $ROOT_P_SIZE" >> log.txt 2>&1
+echo "BOOT: $BOOT_P_OFFSET, $BOOT_P_SIZE ROOTFS: $ROOT_P_OFFSET, $ROOT_P_SIZE" >> $LOG 2>&1
 
 echo -n "*   Setting up virtual partitions..."
 losetup -o $BOOT_P_OFFSET --sizelimit $BOOT_P_SIZE $L2 $L1
 losetup -o $ROOT_P_OFFSET --sizelimit $ROOT_P_SIZE $L3 $L1
 echo "done"
 echo -n "*   Creating MSDOS filesystem for BOOT partition ..."
-tools/mkdosfs -n "BOOT" -F 16 $L2 >>log.txt 2>&1
+tools/mkdosfs -n "BOOT" -F 16 $L2 >>$LOG 2>&1
 echo "done"
 echo -n "*   Creating EXT3 filesystem for ROOTFS partition ..."
-mkfs.ext3 -m 0 -L "ROOTFS" $L3 $ROOT_P_BLOCKS >>log.txt 2>&1
-tune2fs -c 0 $L3 >>log.txt 2>&1
+mkfs.ext3 -m 0 -L "ROOTFS" $L3 $ROOT_P_BLOCKS >>$LOG 2>&1
+tune2fs -c 0 $L3 >> $LOG 2>&1
  
 echo "done"
 
